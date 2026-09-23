@@ -12,7 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStore } from "@/lib/store";
+import { useAdminList } from "@/hooks/use-admin-list";
+import { adminApi } from "@/services/admin";
 
 export const Route = createFileRoute("/empresas")({
   head: () => ({
@@ -35,13 +36,12 @@ export const Route = createFileRoute("/empresas")({
 });
 
 function EmpresasPage() {
-  const { entities, donations } = useStore();
+  const { data: entities, loading, error } = useAdminList("companies", adminApi.companies);
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
 
   const list = entities
-    .filter((e) => e.tipo === "empresa")
-    .filter((e) => !term || `${e.nombre} ${e.giro} ${e.ciudad}`.toLowerCase().includes(term));
+    .filter((e) => !term || `${e.name} ${e.description ?? ""} ${e.address?.city ?? ""}`.toLowerCase().includes(term));
 
   return (
     <AppShell title="Empresas" subtitle="Empresas donantes registradas en la red">
@@ -72,22 +72,22 @@ function EmpresasPage() {
             </TableHeader>
             <TableBody>
               {list.map((e) => (
-                <TableRow key={e.id}>
-                  <TableCell className="font-medium">{e.nombre}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.giro}</TableCell>
-                  <TableCell>{e.ciudad}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.contacto}</TableCell>
-                  <TableCell>{donations.filter((d) => d.empresaId === e.id).length}</TableCell>
+                <TableRow key={e._id}>
+                  <TableCell className="font-medium">{e.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.description || "—"}</TableCell>
+                  <TableCell>{e.address?.city || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.email || e.phone || "—"}</TableCell>
+                  <TableCell><span title="Conteo no disponible en este módulo">—</span></TableCell>
                   <TableCell>
-                    <StatusBadge status={e.estatus} />
+                    <StatusBadge status={e.status === "active" ? "Activo" : "Inactivo"} />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{e.desde}</TableCell>
+                  <TableCell className="text-muted-foreground">{e.createdAt?.slice(0, 10) ?? "—"}</TableCell>
                 </TableRow>
               ))}
               {list.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
-                    No hay empresas que coincidan con la búsqueda.
+                    {loading ? "Cargando empresas…" : error ?? "No hay empresas que coincidan con la búsqueda."}
                   </TableCell>
                 </TableRow>
               )}

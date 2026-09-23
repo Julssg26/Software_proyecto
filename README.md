@@ -92,6 +92,7 @@ Las pruebas existentes de backend usan persistencia simulada y no modifican Atla
 ## Estado funcional
 
 - Autenticación, sesión, perfil y Entity están conectados al backend real.
-- Donaciones, solicitudes, entregas, reportes y listados administrativos conservan su comportamiento simulado en el frontend.
+- Los listados administrativos de usuarios, empresas y organizaciones consultan datos reales del backend y requieren el rol `admin`.
+- Donaciones, solicitudes, entregas y reportes conservan su comportamiento simulado en el frontend.
 - El backend incluye los modelos Donation, Request, Delivery y Notification; todavía no tiene endpoints para esos módulos.
 - Los directorios de dependencias, compilación, cachés y archivos `.env` están ignorados por Git. Los `.env.example` pueden versionarse.

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStore } from "@/lib/store";
+import { useAdminList } from "@/hooks/use-admin-list";
+import { adminApi } from "@/services/admin";
 import { ROLE_LABEL } from "@/lib/types";
 
 export const Route = createFileRoute("/usuarios")({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/usuarios")({
       { property: "og:title", content: "Gestión de usuarios | DonaRed" },
       {
         property: "og:description",
-        content: "Activa o desactiva cuentas y consulta los roles asignados.",
+        content: "Consulta las cuentas y los roles asignados.",
       },
     ],
   }),
@@ -36,13 +36,13 @@ export const Route = createFileRoute("/usuarios")({
 });
 
 function UsuariosPage() {
-  const { users, toggleUserStatus } = useStore();
+  const { data: users, loading, error } = useAdminList("users", adminApi.users);
   const [q, setQ] = useState("");
 
   const list = users.filter(
     (u) =>
       !q.trim() ||
-      `${u.nombre} ${u.correo} ${u.entidad}`.toLowerCase().includes(q.trim().toLowerCase()),
+      `${u.name} ${u.email} ${u.entity?.name ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()),
   );
 
   return (
@@ -72,25 +72,30 @@ function UsuariosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {list.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                    {loading ? "Cargando usuarios…" : error ?? "No hay usuarios que coincidan con la búsqueda."}
+                  </TableCell>
+                </TableRow>
+              )}
               {list.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.nombre}</TableCell>
-                  <TableCell className="text-muted-foreground">{u.correo}</TableCell>
-                  <TableCell>{ROLE_LABEL[u.rol]}</TableCell>
-                  <TableCell className="text-muted-foreground">{u.entidad}</TableCell>
+                <TableRow key={u._id}>
+                  <TableCell className="font-medium">{u.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                  <TableCell>{ROLE_LABEL[u.role]}</TableCell>
+                  <TableCell className="text-muted-foreground">{u.entity?.name ?? "Sin entidad"}</TableCell>
                   <TableCell>
-                    <StatusBadge status={u.estado} />
+                    <StatusBadge status={u.status === "active" ? "Activo" : "Inactivo"} />
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        toggleUserStatus(u.id);
-                        toast.success("Estado de la cuenta actualizado");
-                      }}
+                      disabled
+                      title="Solo consulta: la edición administrativa no está disponible"
                     >
-                      {u.estado === "Activo" ? "Desactivar" : "Activar"}
+                      {u.status === "active" ? "Desactivar" : "Activar"}
                     </Button>
                   </TableCell>
                 </TableRow>

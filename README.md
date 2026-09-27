@@ -96,3 +96,22 @@ Las pruebas existentes de backend usan persistencia simulada y no modifican Atla
 - Donaciones, solicitudes, entregas y reportes conservan su comportamiento simulado en el frontend.
 - El backend incluye los modelos Donation, Request, Delivery y Notification; todavía no tiene endpoints para esos módulos.
 - Los directorios de dependencias, compilación, cachés y archivos `.env` están ignorados por Git. Los `.env.example` pueden versionarse.
+
+## CI/CD
+
+GitHub Actions ejecuta [.github/workflows/ci.yml](.github/workflows/ci.yml) en cada
+push a `main` y pull request hacia `main`, con dos jobs independientes:
+
+- `backend-tests`: instala con `npm ci` y ejecuta todas las pruebas de node:test
+  con persistencia simulada, sin MongoDB real.
+- `frontend-checks`: instala con `npm ci` y ejecuta pruebas, TypeScript, lint y build.
+
+Ambos usan Node.js 22 y caché npm separada por lockfile. No existen scripts
+`test` o `typecheck`: se ejecutan directamente `node --test` y el compilador
+TypeScript instalado. Lint y build usan sus scripts existentes.
+
+Solo se utilizan valores ficticios: `JWT_SECRET=ci_test_secret`,
+`DB_NAME=donaciones_ci` y `VITE_API_URL=https://example.invalid/api`.
+Este workflow no despliega ni requiere secretos. Ambos jobs deben pasar;
+para exigirlo antes de fusionar, configura los checks `backend-tests` y
+`frontend-checks` como obligatorios en la protección de `main`.

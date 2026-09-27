@@ -9,7 +9,10 @@ function loadApi(fetch, env = {}) {
   const events = [];
   const exports = {};
   const source = ts.transpileModule(
-    readFileSync(new URL("../src/services/api.ts", import.meta.url), "utf8").replace(/import\.meta\.env/g, "testEnv"),
+    readFileSync(new URL("../src/services/api.ts", import.meta.url), "utf8").replace(
+      /import\.meta\.env/g,
+      "testEnv",
+    ),
     {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     },
@@ -111,10 +114,13 @@ test("Errores de conexión, usuario inactivo, email duplicado y JSON inválido s
 test("La URL configurada se usa en las llamadas y un valor vacío conserva local", async () => {
   for (const value of ["https://backend.example/api", "", undefined]) {
     let requested;
-    const client = loadApi(async url => {
-      requested = url;
-      return Response.json({ status: "ok" });
-    }, { VITE_API_URL: value });
+    const client = loadApi(
+      async (url) => {
+        requested = url;
+        return Response.json({ status: "ok" });
+      },
+      { VITE_API_URL: value },
+    );
     await client.api("/health");
     assert.equal(requested, (value || "http://localhost:3000/api") + "/health");
   }

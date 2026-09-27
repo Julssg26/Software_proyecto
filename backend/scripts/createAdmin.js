@@ -7,7 +7,7 @@ async function createAdmin(env = process.env) {
     if (!env.MONGODB_URI?.trim()) throw new Error('Configura MONGODB_URI en backend/.env');
     // Usa la misma URI que el servidor, fijando la base solicitada.
     // La conexión se gestiona aquí para garantizar el cierre incluso si falla.
-    await mongoose.connect(env.MONGODB_URI, { dbName: 'donaciones_db' });
+    await mongoose.connect(env.MONGODB_URI, { dbName: env.DB_NAME || 'donaciones_db' });
 
     if (await User.exists({ role: 'admin' })) {
       console.log('Ya existe un administrador en el sistema');

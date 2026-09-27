@@ -38,7 +38,7 @@ export default defineConfig(({ command }) => ({
         client: { files: ["**/server/**"], specifiers: ["server-only"] },
       },
     }),
-    ...(command === "build" ? [nitro({ preset: "cloudflare-module" })] : []),
+    ...(command === "build" ? [nitro({ preset: "vercel" })] : []),
     react(),
   ],
 }));

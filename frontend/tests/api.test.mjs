@@ -4,18 +4,19 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 
-function loadApi(fetch) {
+function loadApi(fetch, env = {}) {
   const storage = new Map();
   const events = [];
   const exports = {};
   const source = ts.transpileModule(
-    readFileSync(new URL("../src/services/api.ts", import.meta.url), "utf8"),
+    readFileSync(new URL("../src/services/api.ts", import.meta.url), "utf8").replace(/import\.meta\.env/g, "testEnv"),
     {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     },
   ).outputText;
   vm.runInNewContext(source, {
     exports,
+    testEnv: env,
     fetch,
     AbortSignal,
     Event,
@@ -105,4 +106,16 @@ test("Errores de conexión, usuario inactivo, email duplicado y JSON inválido s
   await assert.rejects(duplicate.api("/auth/register"), /Email ya registrado/);
   const invalid = loadApi(async () => new Response("<html>"));
   await assert.rejects(invalid.api("/auth/profile"), /respuesta inválida/);
+});
+
+test("La URL configurada se usa en las llamadas y un valor vacío conserva local", async () => {
+  for (const value of ["https://backend.example/api", "", undefined]) {
+    let requested;
+    const client = loadApi(async url => {
+      requested = url;
+      return Response.json({ status: "ok" });
+    }, { VITE_API_URL: value });
+    await client.api("/health");
+    assert.equal(requested, (value || "http://localhost:3000/api") + "/health");
+  }
 });

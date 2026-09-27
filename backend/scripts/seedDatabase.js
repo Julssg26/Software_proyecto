@@ -12,7 +12,7 @@ async function seedDatabase(env = process.env) {
     if (!env.MONGODB_URI?.trim()) throw new Error('Configura MONGODB_URI en backend/.env');
     // No crear colecciones ni índices de User/Entity al cargar sus modelos.
     await mongoose.connect(env.MONGODB_URI, {
-      dbName: 'donaciones_db', autoCreate: false, autoIndex: false,
+      dbName: env.DB_NAME || 'donaciones_db', autoCreate: false, autoIndex: false,
     });
     const company = await Entity.findOne({ type: 'empresa' }).select('_id');
     const organization = await Entity.findOne({ type: 'organizacion' }).select('_id');
@@ -60,7 +60,7 @@ async function seedDatabase(env = process.env) {
         }).save({ session });
       }
     });
-    console.log('Datos de prueba insertados en donaciones_db: 1 donación, 1 solicitud y 1 entrega');
+    console.log('Datos de prueba insertados en ' + mongoose.connection.name + ': 1 donación, 1 solicitud y 1 entrega');
     console.log(recipient ? 'Se insertó 1 notificación de prueba' : 'No hay usuarios existentes; no se generaron notificaciones');
   } finally {
     await mongoose.disconnect();

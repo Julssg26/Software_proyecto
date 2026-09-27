@@ -1,6 +1,6 @@
 // En desarrollo apunta al backend local; en staging/producción se define
 // VITE_API_URL en el entorno de build (ver frontend/.env.example).
-export const baseURL = import.meta.env["VITE_API_URL"] ?? "http://localhost:3000/api";
+export const baseURL = import.meta.env["VITE_API_URL"] || "http://localhost:3000/api";
 const TOKEN_KEY = "donared-auth-token";
 export const SESSION_EXPIRED = "donared-session-expired";
 

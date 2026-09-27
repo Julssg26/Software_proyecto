@@ -10,7 +10,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 async function connectDB() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, { dbName: 'donaciones_db' });
+    await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME || 'donaciones_db' });
     console.log('MongoDB conectado correctamente');
   } catch (error) {
     console.error(error);

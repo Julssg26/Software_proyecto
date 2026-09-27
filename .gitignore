@@ -42,3 +42,6 @@ backend/node_modules/
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel build output and local project metadata
+.vercel/

@@ -12,8 +12,13 @@ const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
-app.use(cors({ origin: /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/ }));
+const allowedOrigins = [
+  /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+];
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/entities', entityRoutes);
 app.use('/api/admin', adminRoutes);

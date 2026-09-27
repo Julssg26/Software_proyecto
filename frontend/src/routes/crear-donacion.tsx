@@ -36,8 +36,8 @@ function CrearDonacionPage() {
         <CardContent className="p-6">
           <DonationForm
             submitLabel="Publicar donación"
-            onSubmit={(input) => {
-              createDonation(input);
+            onSubmit={async (input) => {
+              await createDonation(input);
               toast.success("Donación publicada y visible para las organizaciones");
               navigate({ to: "/mis-donaciones" });
             }}

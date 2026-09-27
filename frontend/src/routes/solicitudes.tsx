@@ -99,9 +99,17 @@ function SolicitudesPage() {
                       <>
                         <Button
                           size="sm"
-                          onClick={() => {
-                            approveRequest(r.id);
-                            toast.success("Solicitud aprobada");
+                          onClick={async () => {
+                            try {
+                              await approveRequest(r.id);
+                              toast.success("Solicitud aprobada");
+                            } catch (error) {
+                              toast.error(
+                                error instanceof Error
+                                  ? error.message
+                                  : "No se pudo aprobar la solicitud",
+                              );
+                            }
                           }}
                         >
                           Aprobar
@@ -109,9 +117,17 @@ function SolicitudesPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            rejectRequest(r.id);
-                            toast("Solicitud rechazada");
+                          onClick={async () => {
+                            try {
+                              await rejectRequest(r.id);
+                              toast("Solicitud rechazada");
+                            } catch (error) {
+                              toast.error(
+                                error instanceof Error
+                                  ? error.message
+                                  : "No se pudo rechazar la solicitud",
+                              );
+                            }
                           }}
                         >
                           Rechazar
@@ -128,7 +144,10 @@ function SolicitudesPage() {
               ))}
               {list.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     No hay solicitudes que mostrar.
                   </TableCell>
                 </TableRow>

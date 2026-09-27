@@ -136,20 +136,20 @@ function RegisterPage() {
                   ))}
                 </div>
               </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="entidad">
-                    {form.rol === "empresa" ? "Nombre de la empresa" : "Nombre de la organización"}
-                  </Label>
-                  <Input
-                    id="entidad"
-                    value={form.entidad}
-                    onChange={(e) => setForm({ ...form, entidad: e.target.value })}
-                    placeholder={
-                      form.rol === "empresa" ? "Grupo Alimentario Verde" : "Fundación Manos Unidas"
-                    }
-                    required
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="entidad">
+                  {form.rol === "empresa" ? "Nombre de la empresa" : "Nombre de la organización"}
+                </Label>
+                <Input
+                  id="entidad"
+                  value={form.entidad}
+                  onChange={(e) => setForm({ ...form, entidad: e.target.value })}
+                  placeholder={
+                    form.rol === "empresa" ? "Grupo Alimentario Verde" : "Fundación Manos Unidas"
+                  }
+                  required
+                />
+              </div>
               <Button type="submit" className="w-full" disabled={pending}>
                 {pending ? "Creando cuenta…" : "Crear cuenta"}
               </Button>

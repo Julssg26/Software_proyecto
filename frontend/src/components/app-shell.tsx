@@ -18,6 +18,7 @@ import {
 import { useStore } from "@/lib/store";
 import { ROLE_LABEL, type Role } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; to: string; icon: typeof LayoutDashboard };
@@ -172,6 +173,7 @@ export function AppShell({
             {subtitle && <p className="truncate text-sm text-muted-foreground">{subtitle}</p>}
           </div>
           <div className="hidden items-center gap-2 sm:flex">{actions}</div>
+          <NotificationBell />
           <div className="flex items-center gap-2.5 border-l pl-3">
             <div className="grid size-9 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
               {initials}

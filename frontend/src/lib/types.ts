@@ -1,20 +1,10 @@
 export type Role = "admin" | "empresa" | "organizacion";
 
 export type DonationStatus =
-  | "Disponible"
-  | "Solicitada"
-  | "Aprobada"
-  | "En camino"
-  | "Entregada"
-  | "Rechazada";
+  "Disponible" | "Solicitada" | "Aprobada" | "En camino" | "Entregada" | "Rechazada";
 
 export type RequestStatus =
-  | "Pendiente"
-  | "Aprobada"
-  | "Rechazada"
-  | "En camino"
-  | "Entregada"
-  | "Incidencia";
+  "Pendiente" | "Aprobada" | "Rechazada" | "En camino" | "Entregada" | "Incidencia";
 
 export type Category =
   | "Alimentos frescos"
@@ -78,6 +68,7 @@ export interface DonationRequest {
   fecha: string;
   estado: RequestStatus;
   incidencia?: string;
+  entregaId?: string;
 }
 
 export interface User {
@@ -107,3 +98,20 @@ export const ROLE_LABEL: Record<Role, string> = {
   empresa: "Empresa donante",
   organizacion: "Organización social",
 };
+
+export type NotificationType =
+  | "new_request"
+  | "request_approved"
+  | "request_rejected"
+  | "donation_shipped"
+  | "donation_received"
+  | "incident_reported";
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  fecha: string;
+}

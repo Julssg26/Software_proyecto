@@ -223,7 +223,11 @@ export const seedDonations: Donation[] = [
       { estado: "Solicitada", fecha: "2026-08-11", nota: "Solicitada por Fundación Manos Unidas" },
       { estado: "Aprobada", fecha: "2026-08-12", nota: "Solicitud aprobada" },
       { estado: "En camino", fecha: "2026-08-13", nota: "Salida de almacén" },
-      { estado: "Entregada", fecha: "2026-08-14", nota: "Recepción confirmada por la organización" },
+      {
+        estado: "Entregada",
+        fecha: "2026-08-14",
+        nota: "Recepción confirmada por la organización",
+      },
     ],
   },
   {
@@ -339,7 +343,10 @@ export const seedRequests: DonationRequest[] = [
 
 export const seedActivity = [
   { texto: "Grupo Alimentario Verde publicó “Despensas básicas familiares”", fecha: "2026-09-02" },
-  { texto: "Fundación Manos Unidas solicitó “Pan de caja y bollería del día”", fecha: "2026-09-09" },
+  {
+    texto: "Fundación Manos Unidas solicitó “Pan de caja y bollería del día”",
+    fecha: "2026-09-09",
+  },
   { texto: "Supermercados Aurora marcó “Kits de higiene personal” en camino", fecha: "2026-09-05" },
   { texto: "Comedor Esperanza confirmó recepción de “Verdura de temporada”", fecha: "2026-08-14" },
 ];

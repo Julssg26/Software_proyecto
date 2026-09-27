@@ -21,7 +21,8 @@ export const Route = createFileRoute("/organizaciones")({
       { title: "Organizaciones sociales | DonaRed" },
       {
         name: "description",
-        content: "Directorio de organizaciones sociales beneficiarias, su ciudad y solicitudes realizadas.",
+        content:
+          "Directorio de organizaciones sociales beneficiarias, su ciudad y solicitudes realizadas.",
       },
       { property: "og:title", content: "Organizaciones sociales | DonaRed" },
       {
@@ -40,8 +41,11 @@ function OrganizacionesPage() {
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
 
-  const list = entities
-    .filter((e) => !term || `${e.name} ${e.description ?? ""} ${e.address?.city ?? ""}`.toLowerCase().includes(term));
+  const list = entities.filter(
+    (e) =>
+      !term ||
+      `${e.name} ${e.description ?? ""} ${e.address?.city ?? ""}`.toLowerCase().includes(term),
+  );
 
   return (
     <AppShell title="Organizaciones" subtitle="Organizaciones sociales beneficiarias">
@@ -77,9 +81,15 @@ function OrganizacionesPage() {
                     <TableCell className="font-medium">{e.name}</TableCell>
                     <TableCell className="text-muted-foreground">{e.description || "—"}</TableCell>
                     <TableCell>{e.address?.city || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{e.email || e.phone || "—"}</TableCell>
-                    <TableCell><span title="Conteo no disponible en este módulo">—</span></TableCell>
-                    <TableCell><span title="Conteo no disponible en este módulo">—</span></TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {e.email || e.phone || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <span title="Conteo no disponible en este módulo">—</span>
+                    </TableCell>
+                    <TableCell>
+                      <span title="Conteo no disponible en este módulo">—</span>
+                    </TableCell>
                     <TableCell>
                       <StatusBadge status={e.status === "active" ? "Activo" : "Inactivo"} />
                     </TableCell>
@@ -89,7 +99,9 @@ function OrganizacionesPage() {
               {list.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
-                    {loading ? "Cargando organizaciones…" : error ?? "No hay organizaciones que coincidan con la búsqueda."}
+                    {loading
+                      ? "Cargando organizaciones…"
+                      : (error ?? "No hay organizaciones que coincidan con la búsqueda.")}
                   </TableCell>
                 </TableRow>
               )}

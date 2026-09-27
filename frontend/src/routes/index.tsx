@@ -71,8 +71,8 @@ function LoginPage() {
             Conectamos excedentes de empresas con quienes más los necesitan.
           </h2>
           <p className="text-sm opacity-80">
-            Publica donaciones de alimentos y recursos, recibe solicitudes de organizaciones sociales
-            y da seguimiento a cada entrega con total transparencia.
+            Publica donaciones de alimentos y recursos, recibe solicitudes de organizaciones
+            sociales y da seguimiento a cada entrega con total transparencia.
           </p>
           <ul className="space-y-3 text-sm">
             {[
@@ -90,9 +90,7 @@ function LoginPage() {
           </ul>
         </div>
 
-        <p className="text-xs opacity-60">
-          Plataforma de donaciones · Ingeniería de Software
-        </p>
+        <p className="text-xs opacity-60">Plataforma de donaciones · Ingeniería de Software</p>
       </section>
 
       <section className="flex items-center justify-center px-5 py-10">

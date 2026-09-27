@@ -5,12 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore } from "@/lib/store";
 
@@ -69,9 +64,17 @@ function MisSolicitudesPage() {
                 {["En camino", "Aprobada"].includes(r.estado) && (
                   <Button
                     size="sm"
-                    onClick={() => {
-                      confirmReceipt(r.donacionId);
-                      toast.success("Recepción confirmada");
+                    onClick={async () => {
+                      try {
+                        await confirmReceipt(r.donacionId);
+                        toast.success("Recepción confirmada");
+                      } catch (error) {
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : "No se pudo confirmar la recepción",
+                        );
+                      }
                     }}
                   >
                     Confirmar recepción
@@ -117,11 +120,17 @@ function MisSolicitudesPage() {
             onChange={(e) => setDetalle(e.target.value)}
           />
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!detalle.trim()) return;
-              reportIncident(incidenciaId!, detalle.trim());
-              toast("Incidencia registrada, la empresa fue notificada");
-              setIncidenciaId(null);
+              try {
+                await reportIncident(incidenciaId!, detalle.trim());
+                toast("Incidencia registrada, la empresa fue notificada");
+                setIncidenciaId(null);
+              } catch (error) {
+                toast.error(
+                  error instanceof Error ? error.message : "No se pudo registrar la incidencia",
+                );
+              }
             }}
           >
             Enviar reporte

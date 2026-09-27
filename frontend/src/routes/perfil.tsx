@@ -13,7 +13,8 @@ export const Route = createFileRoute("/perfil")({
       { title: "Mi perfil | DonaRed" },
       {
         name: "description",
-        content: "Consulta los datos de tu cuenta, tu entidad y el resumen de tu actividad en la red.",
+        content:
+          "Consulta los datos de tu cuenta, tu entidad y el resumen de tu actividad en la red.",
       },
       { property: "og:title", content: "Mi perfil | DonaRed" },
       {
@@ -37,9 +38,19 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function PerfilPage() {
-  const { currentUser, currentEntity: entity, donations, requests, refreshProfile, hydrated } = useStore();
+  const {
+    currentUser,
+    currentEntity: entity,
+    donations,
+    requests,
+    refreshProfile,
+    hydrated,
+  } = useStore();
   useEffect(() => {
-    if (hydrated) void refreshProfile().catch(error => toast.error(error instanceof Error ? error.message : "No se pudo cargar el perfil"));
+    if (hydrated)
+      void refreshProfile().catch((error) =>
+        toast.error(error instanceof Error ? error.message : "No se pudo cargar el perfil"),
+      );
   }, [hydrated, refreshProfile]);
   if (!currentUser) return <AppShell title="Perfil">{null}</AppShell>;
   const esEmpresa = currentUser.rol === "empresa";
@@ -74,7 +85,13 @@ function PerfilPage() {
             <Row label="Contacto" value={entity?.email || entity?.phone || currentUser.correo} />
             <Row
               label="Estado"
-              value={entity ? <StatusBadge status={entity.status === "active" ? "Activo" : "Inactivo"} /> : "Sin registro"}
+              value={
+                entity ? (
+                  <StatusBadge status={entity.status === "active" ? "Activo" : "Inactivo"} />
+                ) : (
+                  "Sin registro"
+                )
+              }
             />
             <Row label="Miembro desde" value={entity?.createdAt?.slice(0, 10) ?? "—"} />
           </CardContent>

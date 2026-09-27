@@ -69,7 +69,12 @@ function DonacionDetallePage() {
 
   return (
     <AppShell title={donation.nombre} subtitle={`Publicada por ${donation.empresaNombre}`}>
-      <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/donaciones" })}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mb-4"
+        onClick={() => navigate({ to: "/donaciones" })}
+      >
         <ArrowLeft className="size-4" /> Volver
       </Button>
 
@@ -144,9 +149,17 @@ function DonacionDetallePage() {
                     {miSolicitud.estado === "En camino" && (
                       <Button
                         className="w-full"
-                        onClick={() => {
-                          confirmReceipt(donation.id);
-                          toast.success("Recepción confirmada, ¡gracias!");
+                        onClick={async () => {
+                          try {
+                            await confirmReceipt(donation.id);
+                            toast.success("Recepción confirmada, ¡gracias!");
+                          } catch (error) {
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "No se pudo confirmar la recepción",
+                            );
+                          }
                         }}
                       >
                         Confirmar recepción
@@ -163,10 +176,21 @@ function DonacionDetallePage() {
                     />
                     <Button
                       className="w-full"
-                      onClick={() => {
-                        requestDonation(donation.id, mensaje.trim() || "Solicitud sin mensaje adicional");
-                        toast.success("Solicitud enviada a la empresa donante");
-                        setMensaje("");
+                      onClick={async () => {
+                        try {
+                          await requestDonation(
+                            donation.id,
+                            mensaje.trim() || "Solicitud sin mensaje adicional",
+                          );
+                          toast.success("Solicitud enviada a la empresa donante");
+                          setMensaje("");
+                        } catch (error) {
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : "No se pudo enviar la solicitud",
+                          );
+                        }
                       }}
                     >
                       Enviar solicitud
@@ -201,9 +225,17 @@ function DonacionDetallePage() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => {
-                            approveRequest(r.id);
-                            toast.success("Solicitud aprobada");
+                          onClick={async () => {
+                            try {
+                              await approveRequest(r.id);
+                              toast.success("Solicitud aprobada");
+                            } catch (error) {
+                              toast.error(
+                                error instanceof Error
+                                  ? error.message
+                                  : "No se pudo aprobar la solicitud",
+                              );
+                            }
                           }}
                         >
                           Aprobar
@@ -211,9 +243,17 @@ function DonacionDetallePage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            rejectRequest(r.id);
-                            toast("Solicitud rechazada");
+                          onClick={async () => {
+                            try {
+                              await rejectRequest(r.id);
+                              toast("Solicitud rechazada");
+                            } catch (error) {
+                              toast.error(
+                                error instanceof Error
+                                  ? error.message
+                                  : "No se pudo rechazar la solicitud",
+                              );
+                            }
                           }}
                         >
                           Rechazar
@@ -225,9 +265,15 @@ function DonacionDetallePage() {
                 {esDueña && donation.estado === "Aprobada" && !pendiente && (
                   <Button
                     className="w-full"
-                    onClick={() => {
-                      markShipped(donation.id);
-                      toast.success("Donación marcada como enviada");
+                    onClick={async () => {
+                      try {
+                        await markShipped(donation.id);
+                        toast.success("Donación marcada como enviada");
+                      } catch (error) {
+                        toast.error(
+                          error instanceof Error ? error.message : "No se pudo marcar como enviada",
+                        );
+                      }
                     }}
                   >
                     Marcar como enviada

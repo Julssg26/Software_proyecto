@@ -59,10 +59,7 @@ function DonacionesPage() {
   );
 
   return (
-    <AppShell
-      title="Donaciones"
-      subtitle="Recursos publicados por las empresas donantes de la red"
-    >
+    <AppShell title="Donaciones" subtitle="Recursos publicados por las empresas donantes de la red">
       <Card>
         <CardContent className="grid gap-3 p-4 md:grid-cols-[1fr_auto_auto]">
           <div className="relative">

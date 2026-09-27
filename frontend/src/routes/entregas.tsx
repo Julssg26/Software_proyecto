@@ -38,10 +38,7 @@ function EntregasPage() {
   });
 
   return (
-    <AppShell
-      title="Entregas"
-      subtitle="Seguimiento del traslado de las donaciones aprobadas"
-    >
+    <AppShell title="Entregas" subtitle="Seguimiento del traslado de las donaciones aprobadas">
       <div className="space-y-5">
         {activas.map((r) => {
           const d = donations.find((x) => x.id === r.donacionId);
@@ -75,9 +72,17 @@ function EntregasPage() {
                   {currentUser?.rol === "empresa" && r.estado === "Aprobada" && (
                     <Button
                       size="sm"
-                      onClick={() => {
-                        markShipped(r.donacionId);
-                        toast.success("Donación marcada como enviada");
+                      onClick={async () => {
+                        try {
+                          await markShipped(r.donacionId);
+                          toast.success("Donación marcada como enviada");
+                        } catch (error) {
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : "No se pudo marcar como enviada",
+                          );
+                        }
                       }}
                     >
                       Marcar como enviada
@@ -87,9 +92,17 @@ function EntregasPage() {
                     ["Aprobada", "En camino"].includes(r.estado) && (
                       <Button
                         size="sm"
-                        onClick={() => {
-                          confirmReceipt(r.donacionId);
-                          toast.success("Recepción confirmada");
+                        onClick={async () => {
+                          try {
+                            await confirmReceipt(r.donacionId);
+                            toast.success("Recepción confirmada");
+                          } catch (error) {
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "No se pudo confirmar la recepción",
+                            );
+                          }
                         }}
                       >
                         Confirmar recepción

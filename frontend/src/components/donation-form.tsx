@@ -21,7 +21,7 @@ export function DonationForm({
 }: {
   initial?: NewDonationInput;
   submitLabel: string;
-  onSubmit: (input: NewDonationInput) => void;
+  onSubmit: (input: NewDonationInput) => void | Promise<void>;
   onCancel?: () => void;
 }) {
   const [form, setForm] = useState<NewDonationInput>(
@@ -36,6 +36,7 @@ export function DonationForm({
     },
   );
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   return (
     <form
@@ -47,7 +48,15 @@ export function DonationForm({
           return;
         }
         setError("");
-        onSubmit({ ...form, nombre: form.nombre.trim() });
+        const result = onSubmit({ ...form, nombre: form.nombre.trim() });
+        if (result instanceof Promise) {
+          setSubmitting(true);
+          result
+            .catch((err) =>
+              setError(err instanceof Error ? err.message : "No se pudo guardar la donación"),
+            )
+            .finally(() => setSubmitting(false));
+        }
       }}
     >
       <div className="grid gap-2">
@@ -134,9 +143,11 @@ export function DonationForm({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex flex-wrap gap-2">
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Guardando…" : submitLabel}
+        </Button>
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
             Cancelar
           </Button>
         )}

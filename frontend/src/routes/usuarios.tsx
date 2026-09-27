@@ -75,7 +75,9 @@ function UsuariosPage() {
               {list.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                    {loading ? "Cargando usuarios…" : error ?? "No hay usuarios que coincidan con la búsqueda."}
+                    {loading
+                      ? "Cargando usuarios…"
+                      : (error ?? "No hay usuarios que coincidan con la búsqueda.")}
                   </TableCell>
                 </TableRow>
               )}
@@ -84,7 +86,9 @@ function UsuariosPage() {
                   <TableCell className="font-medium">{u.name}</TableCell>
                   <TableCell className="text-muted-foreground">{u.email}</TableCell>
                   <TableCell>{ROLE_LABEL[u.role]}</TableCell>
-                  <TableCell className="text-muted-foreground">{u.entity?.name ?? "Sin entidad"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {u.entity?.name ?? "Sin entidad"}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge status={u.status === "active" ? "Activo" : "Inactivo"} />
                   </TableCell>

@@ -91,7 +91,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico?v=donared-1", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
+      {
+        rel: "icon",
+        href: "/favicon.ico?v=donared-1",
+        sizes: "16x16 32x32 48x48 64x64",
+        type: "image/x-icon",
+      },
       { rel: "icon", href: "/favicon-donared.svg", sizes: "any", type: "image/svg+xml" },
     ],
   }),

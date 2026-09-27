@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Package, Truck, ClipboardCheck, Percent } from "lucide-react";
+import { useState } from "react";
+import { Package, Truck, ClipboardCheck, Percent, Clock, Award } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { MetricCard } from "@/components/metric-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, DONATION_STATUSES } from "@/lib/types";
-import { monthlyStats } from "@/lib/mock-data";
+import { useReportSummary } from "@/hooks/use-reports";
 
 export const Route = createFileRoute("/reportes")({
   head: () => ({
@@ -13,7 +17,8 @@ export const Route = createFileRoute("/reportes")({
       { title: "Reportes e indicadores | DonaRed" },
       {
         name: "description",
-        content: "Indicadores de donaciones publicadas, entregas completadas y distribución por categoría.",
+        content:
+          "Indicadores de donaciones publicadas, entregas completadas y distribución por categoría.",
       },
       { property: "og:title", content: "Reportes e indicadores | DonaRed" },
       {
@@ -42,21 +47,28 @@ function Bar({ label, value, max }: { label: string; value: number; max: number 
   );
 }
 
-function ReportesPage() {
-  const { currentUser, donations, requests } = useStore();
+function formatHours(hours: number | null): string {
+  if (hours === null) return "Sin datos";
+  if (hours < 24) return `${hours} h`;
+  return `${Math.round((hours / 24) * 10) / 10} días`;
+}
 
+function ReportesPage() {
+  const { currentUser, donations } = useStore();
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const {
+    data: summary,
+    loading,
+    error,
+  } = useReportSummary({ from: from || undefined, to: to || undefined });
+
+  // La distribución por categoría/estado ya usa `donations`, que el store llena
+  // con datos reales filtrados por rol (backend); no depende de reports/summary.
   const mine =
     currentUser?.rol === "empresa"
       ? donations.filter((d) => d.empresaId === currentUser.entidadId)
       : donations;
-  const myRequests =
-    currentUser?.rol === "empresa"
-      ? requests.filter((r) => r.empresaId === currentUser.entidadId)
-      : requests;
-
-  const entregadas = mine.filter((d) => d.estado === "Entregada").length;
-  const tasa = mine.length ? Math.round((entregadas / mine.length) * 100) : 0;
-  const unidades = mine.reduce((sum, d) => sum + d.cantidad, 0);
 
   const byCategory = CATEGORIES.map((c) => ({
     label: c,
@@ -69,20 +81,115 @@ function ReportesPage() {
     value: mine.filter((d) => d.estado === s).length,
   }));
   const maxStatus = Math.max(1, ...byStatus.map((s) => s.value));
-  const maxMonth = Math.max(...monthlyStats.map((m) => Math.max(m.donaciones, m.entregas)));
+
+  const dash = (value: number | undefined) => (loading || value === undefined ? "…" : value);
+
+  const topCards =
+    summary?.role === "admin"
+      ? [
+          {
+            label: "Donaciones publicadas",
+            value: dash(summary.donationsPublished),
+            icon: Package,
+          },
+          { label: "Entregas completadas", value: dash(summary.donationsDelivered), icon: Truck },
+          {
+            label: "Tasa de rechazo",
+            value: loading ? "…" : `${summary.rejectionRate}%`,
+            icon: Percent,
+          },
+          {
+            label: "Tiempo prom. de aprobación",
+            value: loading ? "…" : formatHours(summary.avgApprovalHours),
+            icon: Clock,
+          },
+        ]
+      : summary?.role === "empresa"
+        ? [
+            {
+              label: "Donaciones publicadas",
+              value: dash(summary.donationsPublished),
+              icon: Package,
+            },
+            { label: "Entregas completadas", value: dash(summary.donationsDelivered), icon: Truck },
+            {
+              label: "Tasa de rechazo",
+              value: loading ? "…" : `${summary.rejectionRate}%`,
+              icon: Percent,
+            },
+            {
+              label: "Tiempo prom. de entrega",
+              value: loading ? "…" : formatHours(summary.avgDeliveryHours),
+              icon: Clock,
+            },
+          ]
+        : summary?.role === "organizacion"
+          ? [
+              {
+                label: "Solicitudes enviadas",
+                value: dash(summary.requestsSent),
+                icon: ClipboardCheck,
+              },
+              {
+                label: "Solicitudes aprobadas",
+                value: dash(summary.requestsApproved),
+                icon: Package,
+              },
+              {
+                label: "Tasa de rechazo",
+                value: loading ? "…" : `${summary.rejectionRate}%`,
+                icon: Percent,
+              },
+              {
+                label: "Tiempo prom. de aprobación",
+                value: loading ? "…" : formatHours(summary.avgApprovalHours),
+                icon: Clock,
+              },
+            ]
+          : [];
 
   return (
     <AppShell title="Reportes" subtitle="Indicadores de impacto de la red de donaciones">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Donaciones publicadas" value={mine.length} icon={Package} />
-        <MetricCard label="Entregas completadas" value={entregadas} icon={Truck} />
-        <MetricCard label="Solicitudes recibidas" value={myRequests.length} icon={ClipboardCheck} />
-        <MetricCard
-          label="Tasa de entrega"
-          value={`${tasa}%`}
-          hint={`${unidades} unidades gestionadas`}
-          icon={Percent}
-        />
+      <Card>
+        <CardContent className="flex flex-wrap items-end gap-4 p-4">
+          <div className="grid gap-1.5">
+            <Label htmlFor="report-from">Desde</Label>
+            <Input
+              id="report-from"
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="report-to">Hasta</Label>
+            <Input id="report-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          {(from || to) && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFrom("");
+                setTo("");
+              }}
+            >
+              Limpiar filtro
+            </Button>
+          )}
+          <p className="ml-auto text-xs text-muted-foreground">
+            Sin fechas se muestra todo el histórico.
+          </p>
+        </CardContent>
+      </Card>
+
+      {error && (
+        <p className="mt-4 text-sm text-destructive">No se pudieron cargar los reportes: {error}</p>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {topCards.map((c) => (
+          <MetricCard key={c.label} label={c.label} value={c.value} icon={c.icon} />
+        ))}
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -112,40 +219,51 @@ function ReportesPage() {
         </Card>
       </div>
 
-      <Card className="mt-5">
-        <CardHeader>
-          <CardTitle className="text-base">Evolución mensual</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-4 overflow-x-auto pb-2">
-            {monthlyStats.map((m) => (
-              <div key={m.mes} className="flex min-w-14 flex-1 flex-col items-center gap-2">
-                <div className="flex h-40 items-end gap-1.5">
-                  <div
-                    className="w-5 rounded-t-md bg-primary"
-                    style={{ height: `${(m.donaciones / maxMonth) * 100}%` }}
-                    title={`${m.donaciones} donaciones`}
-                  />
-                  <div
-                    className="w-5 rounded-t-md bg-accent"
-                    style={{ height: `${(m.entregas / maxMonth) * 100}%` }}
-                    title={`${m.entregas} entregas`}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground">{m.mes}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex gap-5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <span className="size-3 rounded-sm bg-primary" /> Donaciones publicadas
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="size-3 rounded-sm bg-accent" /> Entregas completadas
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {summary?.role === "admin" && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Top categorías donadas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {summary.topCategories.length === 0 && (
+                <p className="text-sm text-muted-foreground">Sin datos en el rango seleccionado.</p>
+              )}
+              {summary.topCategories.map((c) => (
+                <Bar
+                  key={c.category}
+                  label={c.category}
+                  value={c.count}
+                  max={Math.max(1, ...summary.topCategories.map((x) => x.count))}
+                />
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Award className="size-4" /> Top organizaciones receptoras
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {summary.topOrganizations.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Sin entregas confirmadas en el rango seleccionado.
+                </p>
+              )}
+              {summary.topOrganizations.map((o) => (
+                <Bar
+                  key={o.organizationId}
+                  label={o.name ?? "Organización eliminada"}
+                  value={o.count}
+                  max={Math.max(1, ...summary.topOrganizations.map((x) => x.count))}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </AppShell>
   );
 }

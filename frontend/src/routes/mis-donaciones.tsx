@@ -6,12 +6,7 @@ import { DonationForm } from "@/components/donation-form";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -28,7 +23,8 @@ export const Route = createFileRoute("/mis-donaciones")({
       { title: "Mis donaciones | DonaRed" },
       {
         name: "description",
-        content: "Administra las donaciones publicadas por tu empresa: edita, elimina y da seguimiento.",
+        content:
+          "Administra las donaciones publicadas por tu empresa: edita, elimina y da seguimiento.",
       },
       { property: "og:title", content: "Mis donaciones | DonaRed" },
       {
@@ -91,9 +87,17 @@ function MisDonacionesPage() {
                     {d.estado === "Aprobada" && (
                       <Button
                         size="sm"
-                        onClick={() => {
-                          markShipped(d.id);
-                          toast.success("Donación marcada como enviada");
+                        onClick={async () => {
+                          try {
+                            await markShipped(d.id);
+                            toast.success("Donación marcada como enviada");
+                          } catch (error) {
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "No se pudo marcar como enviada",
+                            );
+                          }
                         }}
                       >
                         Enviar
@@ -106,9 +110,17 @@ function MisDonacionesPage() {
                       size="sm"
                       variant="ghost"
                       className="text-destructive"
-                      onClick={() => {
-                        deleteDonation(d.id);
-                        toast("Donación eliminada");
+                      onClick={async () => {
+                        try {
+                          await deleteDonation(d.id);
+                          toast("Donación eliminada");
+                        } catch (error) {
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : "No se pudo eliminar la donación",
+                          );
+                        }
                       }}
                     >
                       Eliminar
@@ -118,7 +130,10 @@ function MisDonacionesPage() {
               ))}
               {mias.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     Aún no has publicado donaciones.
                   </TableCell>
                 </TableRow>
@@ -145,8 +160,8 @@ function MisDonacionesPage() {
                 vigencia: editing.vigencia,
                 observaciones: editing.observaciones,
               }}
-              onSubmit={(input) => {
-                updateDonation(editing.id, input);
+              onSubmit={async (input) => {
+                await updateDonation(editing.id, input);
                 toast.success("Donación actualizada");
                 setEditId(null);
               }}

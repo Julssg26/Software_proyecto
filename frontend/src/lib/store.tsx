@@ -39,6 +39,7 @@ interface StoreValue extends State {
   currentUser: User | null;
   currentEntity: ApiEntity | null;
   refreshProfile: () => Promise<void>;
+  updateEntity: ReturnType<typeof useAuthSession>["updateEntity"];
   login: ReturnType<typeof useAuthSession>["login"];
   logout: () => void;
   register: ReturnType<typeof useAuthSession>["register"];
@@ -66,8 +67,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(initialState);
   const [hydrated, setHydrated] = useState(false);
   const [donationsLoading, setDonationsLoading] = useState(false);
-  const { currentUser, currentEntity, sessionReady, login, register, logout, refreshProfile } =
-    useAuthSession();
+  const {
+    currentUser,
+    currentEntity,
+    sessionReady,
+    login,
+    register,
+    logout,
+    refreshProfile,
+    updateEntity,
+  } = useAuthSession();
 
   // Notificaciones (módulo 4) todavía no tiene backend propio. Donaciones y
   // Solicitudes ya vienen siempre del servidor (ver refreshDonations/refreshRequests).
@@ -309,6 +318,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     login,
     currentEntity,
     refreshProfile,
+    updateEntity,
     logout,
     register,
     donationsLoading,

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { EntityProfileCard } from "@/components/entity-profile-card";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ function PerfilPage() {
     donations,
     requests,
     refreshProfile,
+    updateEntity,
     hydrated,
   } = useStore();
   useEffect(() => {
@@ -74,28 +76,18 @@ function PerfilPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Entidad</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <Row label="Nombre" value={currentUser.entidad} />
-            <Row label="Actividad" value={entity?.description || "Por definir"} />
-            <Row label="Ciudad" value={entity?.address?.city || "Por definir"} />
-            <Row label="Contacto" value={entity?.email || entity?.phone || currentUser.correo} />
-            <Row
-              label="Estado"
-              value={
-                entity ? (
-                  <StatusBadge status={entity.status === "active" ? "Activo" : "Inactivo"} />
-                ) : (
-                  "Sin registro"
-                )
-              }
-            />
-            <Row label="Miembro desde" value={entity?.createdAt?.slice(0, 10) ?? "—"} />
-          </CardContent>
-        </Card>
+        <EntityProfileCard
+          key={currentUser.id + ":" + (entity?._id ?? "none")}
+          entity={entity}
+          entityName={currentUser.entidad}
+          accountEmail={currentUser.correo}
+          canEdit={Boolean(
+            entity &&
+            currentUser.entidadId === entity._id &&
+            (currentUser.rol === "empresa" || currentUser.rol === "organizacion"),
+          )}
+          onSave={updateEntity}
+        />
       </div>
 
       <Card className="mt-5">

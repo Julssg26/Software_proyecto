@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ApiError, clearToken, getToken, saveToken, SESSION_EXPIRED } from "../services/api";
-import { authApi, toUser, type ApiEntity, type ApiUser, type PublicRole } from "../services/auth";
+import {
+  authApi,
+  toUser,
+  type ApiEntity,
+  type ApiUser,
+  type PublicRole,
+  type EntityInput,
+} from "../services/auth";
 import type { User } from "../lib/types";
 
 const errorMessage = (error: unknown) =>
@@ -20,6 +27,7 @@ export function useAuthSession() {
   const [sessionReady, setSessionReady] = useState(false);
   const pendingRegistration = useRef<ApiUser | null>(null);
   const generation = useRef(0);
+  const entityRevision = useRef(0);
 
   const logout = useCallback(() => {
     generation.current++;
@@ -31,6 +39,7 @@ export function useAuthSession() {
 
   const loadUser = useCallback(async (user: ApiUser, token: string) => {
     if (getToken() !== token) return;
+    const revision = entityRevision.current;
     let entity: ApiEntity | null = null;
     if (user.role !== "admin") {
       try {
@@ -41,6 +50,7 @@ export function useAuthSession() {
       }
     }
     if (getToken() !== token) return;
+    if (revision !== entityRevision.current) return;
     setCurrentEntity(entity);
     setCurrentUser(toUser(user, entity));
   }, []);
@@ -51,6 +61,34 @@ export function useAuthSession() {
     const { user } = await authApi.profile();
     await loadUser(user, token);
   }, [loadUser]);
+
+  const updateEntity = useCallback(
+    async (input: EntityInput) => {
+      const token = getToken();
+      const attempt = generation.current;
+      if (
+        !token ||
+        !currentUser ||
+        !currentEntity ||
+        currentUser.entidadId !== currentEntity._id ||
+        !["empresa", "organizacion"].includes(currentUser.rol)
+      ) {
+        throw new Error("No hay una entidad disponible para editar.");
+      }
+      // Invalida cargas anteriores para que no sobrescriban la respuesta del PUT.
+      entityRevision.current++;
+      const { entity } = await authApi.updateEntity(input);
+      if (getToken() !== token || generation.current !== attempt) {
+        throw new Error("La sesión cambió. Inicia sesión nuevamente.");
+      }
+      entityRevision.current++;
+      setCurrentEntity(entity);
+      setCurrentUser((user) =>
+        user?.id === currentUser.id ? { ...user, entidad: entity.name } : user,
+      );
+    },
+    [currentUser, currentEntity],
+  );
 
   useEffect(() => {
     const expire = () => {
@@ -143,5 +181,14 @@ export function useAuthSession() {
     [refreshProfile],
   );
 
-  return { currentUser, currentEntity, sessionReady, login, register, logout, refreshProfile };
+  return {
+    currentUser,
+    currentEntity,
+    sessionReady,
+    login,
+    register,
+    logout,
+    refreshProfile,
+    updateEntity,
+  };
 }

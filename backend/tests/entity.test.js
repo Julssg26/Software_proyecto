@@ -110,10 +110,18 @@ test('Entidades: rutas y validación con persistencia simulada', async t => {
     const result = await request('PUT', '/me', {
       name: 'Nuevo nombre', description: 'Descripción', phone: '5551234567',
       address: { city: 'Monterrey' }, type: 'organizacion', status: 'inactive', _id: new mongoose.Types.ObjectId(),
+      entityId: new mongoose.Types.ObjectId(), role: 'admin', password: 'no-permitido',
+      createdAt: '2000-01-01T00:00:00Z',
     });
     assert.equal(result.status, 200);
     assert.equal(result.body.entity._id, String(user.entityId));
     assert.equal(result.body.entity.name, 'Nuevo nombre');
+    assert.equal(result.body.entity.description, 'Descripción');
+    assert.equal(result.body.entity.phone, '5551234567');
+    assert.equal(result.body.entity.role, undefined);
+    assert.equal(result.body.entity.password, undefined);
+    assert.equal(result.body.entity.entityId, undefined);
+    assert.notEqual(result.body.entity.createdAt, '2000-01-01T00:00:00.000Z');
     assert.equal(result.body.entity.type, 'empresa');
     assert.equal(result.body.entity.status, 'active');
     assert.equal(result.body.entity.address.city, 'Monterrey');
@@ -141,5 +149,17 @@ test('Entidades: rutas y validación con persistencia simulada', async t => {
     const result = await request('POST', '', { name: 'Organización ejemplo', type: 'empresa' });
     assert.equal(result.status, 201);
     assert.equal(result.body.entity.type, 'organizacion');
+    const updated = await request('PUT', '/me', {
+      name: 'Organización actualizada', description: 'Apoyo social',
+      address: { city: 'Oaxaca' }, email: 'contacto@organizacion.com',
+      type: 'empresa', status: 'inactive',
+    });
+    assert.equal(updated.status, 200);
+    assert.equal(updated.body.entity._id, result.body.entity._id);
+    assert.equal(updated.body.entity.type, 'organizacion');
+    assert.equal(updated.body.entity.status, 'active');
+    assert.equal(updated.body.entity.description, 'Apoyo social');
+    assert.equal(updated.body.entity.address.city, 'Oaxaca');
+    assert.equal(updated.body.entity.email, 'contacto@organizacion.com');
   });
 });
